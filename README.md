@@ -1,2 +1,2 @@
 # mosquitto-example
-example of mosquitto publisher subscriber
+example of mosquitto publisher and subscriber
