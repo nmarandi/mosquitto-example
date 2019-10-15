@@ -14,10 +14,9 @@ using std::chrono_literals::operator ""s;
 
 void mosq_publisher()
 {
+	auto mosquitto = mosquitto_new(SERVER_ID, true, nullptr);
 	try {
-		int res;
-		auto mosquitto = mosquitto_new(SERVER_ID, true, nullptr);
-		res = mosquitto_connect(mosquitto, BROKER_ADDRESS, MQTT_PORT, 0);
+		int res = mosquitto_connect(mosquitto, BROKER_ADDRESS, MQTT_PORT, 0);
 		if (res)
 			throw std::runtime_error("mosquitto connect problem = " + std::to_string(res));
 		const auto mess = "hello world";
@@ -27,13 +26,13 @@ void mosq_publisher()
 				throw std::runtime_error("mosquitto publish problem = " + std::to_string(res));
 			std::this_thread::sleep_for(2s);
 		}
-		res = mosquitto_disconnect(mosquitto);
-		mosquitto_destroy(mosquitto);
 	}
 	catch (std::exception& e)
 	{
 		std::cout << e.what();
 	}
+	mosquitto_disconnect(mosquitto);
+	mosquitto_destroy(mosquitto);
 }
 
 void on_message(struct mosquitto *, void *, const struct mosquitto_message * message)
@@ -43,10 +42,9 @@ void on_message(struct mosquitto *, void *, const struct mosquitto_message * mes
 
 void mosq_subscriber()
 {
+	auto mosquitto = mosquitto_new(CLIENT_ID, true, nullptr);
 	try {
-		int res ;
-		auto mosquitto = mosquitto_new(CLIENT_ID, true, nullptr);
-		res = mosquitto_connect(mosquitto, BROKER_ADDRESS, MQTT_PORT, 0);
+		int res = mosquitto_connect(mosquitto, BROKER_ADDRESS, MQTT_PORT, 0);
 		if (res)
 			throw std::runtime_error("mosquitto connect problem = " + std::to_string(res));
 		res = mosquitto_subscribe(mosquitto, nullptr, MQTT_TOPIC, 0);
@@ -55,15 +53,13 @@ void mosq_subscriber()
 			res = mosquitto_loop(mosquitto, 1000, 1);
 			std::this_thread::sleep_for(1s);
 		}
-		if (res)
-			throw std::runtime_error("mosquitto start loop problem = " + std::to_string(res));
-		res = mosquitto_disconnect(mosquitto);
-		mosquitto_destroy(mosquitto);
 	}
 	catch (std::exception& e)
 	{
 		std::cout << e.what();
 	}
+	mosquitto_disconnect(mosquitto);
+	mosquitto_destroy(mosquitto);
 }
 
 int main(int argc, char *argv[])
@@ -79,6 +75,6 @@ int main(int argc, char *argv[])
 	res = mosquitto_lib_cleanup();
 	std::cout << "press any key to finish" << std::endl;
 	getchar();
-    return 0;
+    	return 0;
 }
 
